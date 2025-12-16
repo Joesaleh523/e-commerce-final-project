@@ -1,0 +1,9 @@
+.categories .category {
+  border: solid 1px transparent;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.categories .category:hover {
+  box-shadow: var(--shadow);
+  border-color: var(--main-color);
+  transform: translateY(-5px); /* subtle lift effect */
+}
