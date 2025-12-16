@@ -2,7 +2,7 @@ import axios from "axios";
 import React from "react";
 import { useQuery } from "@tanstack/react-query"; // ✅ Correct import for v5
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import "./Caregories.css";
 const baseUrl = "https://ecommerce.routemisr.com/api/v1";
 
