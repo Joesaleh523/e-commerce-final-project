@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { BounceLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import { Cartcontext } from "../Cartcontext/CartContext";
@@ -7,26 +7,25 @@ import useproduct from "../../Hooks/useproduct";
 import { Heart } from "lucide-react";
 
 export default function RecentProduct() {
-  const { data, isLoading } = useproduct(); 
+  const { data, isLoading } = useproduct();
   const { addproducttocart } = useContext(Cartcontext);
   const { addToWishlist, removeFromWishlist, wishlist } =
     useContext(WishlistContext);
 
   const [animateId, setAnimateId] = useState(null);
 
-  const isProductInWishlist = (id) => wishlist?.some((item) => item._id === id);
+  const isProductInWishlist = (id) =>
+    wishlist?.some((item) => item._id === id);
 
   const toggleWishlist = (id) => {
-    if (isProductInWishlist(id)) {
-      removeFromWishlist(id);
-    } else {
-      addToWishlist(id);
-    }
+    isProductInWishlist(id)
+      ? removeFromWishlist(id)
+      : addToWishlist(id);
+
     setAnimateId(id);
     setTimeout(() => setAnimateId(null), 400);
   };
 
-  // Loading
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -36,81 +35,62 @@ export default function RecentProduct() {
   }
 
   return (
-    <div className="row">
-      {data?.map((product) => {
-        const productId = product?._id || Math.random();
-        const productTitle =
-          product?.title?.split(" ", 2).join(" ") || "No Title";
-        const productImage =
-          product?.imageCover || "https://via.placeholder.com/150";
-        const productPrice = product?.priceAfterDiscount
-          ? `${product.priceAfterDiscount} EGP`
-          : `${product?.price || "No Price"} EGP`;
+    <div className="container mx-auto px-4 mt-20">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {data?.map((product) => {
+          const productId = product._id;
+          const inWishlist = isProductInWishlist(productId);
 
-        const inWishlist = isProductInWishlist(productId);
-
-        return (
-          <div key={productId} className="w-1/6 relative">
-            <div className="product px-2">
+          return (
+            <div key={productId} className="relative border rounded-lg p-2 flex flex-col">
               <Link
-                to={`/prodectdetails/${productId}/${
-                  product?.category?.name || "unknown"
-                }`}
+                to={`/prodectdetails/${productId}/${product.category?.name}`}
+                className="flex-1"
               >
-                <img src={productImage} alt={productTitle} />
-                <h3 className="text-green-400 text-sm">
-                  {product?.category?.name || "No Category"}
+                <img
+                  src={product.imageCover}
+                  alt={product.title}
+                  className="w-full h-40 object-cover rounded"
+                />
+
+                <h3 className="text-green-500 text-xs mt-2">
+                  {product.category?.name}
                 </h3>
-                <h1 className="text-gray-400 text-lg">{productTitle}</h1>
-                <div className="flex justify-between items-center">
-                  {product?.priceAfterDiscount ? (
-                    <>
-                      <span className="font-light text-red-400 line-through">
-                        {product?.price}EGP
-                      </span>
-                      <span className="font-light text-sm">
-                        {product?.priceAfterDiscount}EGP
-                      </span>
-                    </>
-                  ) : (
-                    <span className="font-light">
-                      {product?.price || "No Price"} EGP
-                    </span>
-                  )}
+
+                <h2 className="text-gray-700 text-sm font-medium">
+                  {product.title.split(" ", 2).join(" ")}
+                </h2>
+
+                <div className="flex justify-between items-center mt-2 text-sm">
+                  <span>{product.price} EGP</span>
                   <span>
-                    {product?.ratingsAverage || 0}{" "}
-                    <i className="fas fa-star text-yellow-300"> </i>
+                    {product.ratingsAverage}
+                    <i className="fas fa-star text-yellow-400 ml-1"></i>
                   </span>
                 </div>
               </Link>
 
+              {/* Wishlist */}
               <button
                 onClick={() => toggleWishlist(productId)}
-                type="button"
-                className={`absolute top-2 right-2 p-2 rounded-full shadow-md transition ${
-                  inWishlist ? "bg-pink-500 text-white" : "bg-gray-200 text-gray-600"
-                } ${animateId === productId ? "animate-heart" : ""}`}
+                className={`absolute top-2 right-2 p-1 rounded-full ${
+                  inWishlist ? "bg-pink-500 text-white" : "bg-white"
+                }`}
               >
-                <Heart fill={inWishlist ? "currentColor" : "none"} />
+                <Heart fill={inWishlist ? "currentColor" : "none"} size={18} />
               </button>
 
+              {/* Add to cart */}
               <button
                 onClick={() => addproducttocart(productId)}
-                type="button"
-                className="text-white btn bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                className="mt-3 w-full bg-green-500 text-white rounded py-2 text-sm"
               >
                 + Add
               </button>
-
-              {product?.priceAfterDiscount ? (
-                <span className="bg-red-500 z-20 text-red-400 left-1.5 text-xs font-medium me-2 px-2.5 py-2 rounded-sm absolute top-0 dark:bg-red-900 dark:text-red-300 border border-red-400">
-                  sale
-                </span>
-              ) : null}
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

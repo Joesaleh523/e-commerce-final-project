@@ -1,56 +1,129 @@
-import { useQuery } from '@tanstack/react-query';
-import React, { useContext, useEffect, useState } from 'react'
-import useproduct from '../../Hooks/useproduct';
-import { Link } from 'react-router-dom';
-import { BounceLoader } from 'react-spinners';
-import { Cartcontext } from './../Cartcontext/CartContext';
-import axios from 'axios';
+import { useContext, useState } from "react";
+import { BounceLoader } from "react-spinners";
+import { Link } from "react-router-dom";
+import { Cartcontext } from "../Cartcontext/CartContext";
+import { WishlistContext } from "../wishlistContext/wishlistContext";
+import useproduct from "../../Hooks/useproduct";
+import { Heart } from "lucide-react";
 
-export default function Products() {
+export default function RecentProduct() {
+  const { data, isLoading } = useproduct();
+  const { addproducttocart } = useContext(Cartcontext);
+  const { addToWishlist, removeFromWishlist, wishlist } =
+    useContext(WishlistContext);
 
- let {data,isError,isFetching,isLoading,error}= useproduct();
- console.log(data);
-  let{addproducttocart}=useContext(Cartcontext)
-   const [AllProducts,setAllProducts]=useState(null)
-   const[isloading,setisloading]=useState(false)
-   function getallproduct(){
-    setisloading(true)
-    axios.get('https://ecommerce.routemisr.com/api/v1/products')
-    .then(({data})=>{
-console.log(data.data);
-setAllProducts(data.data)
-setisloading(false)
-  })
+  const [animateId, setAnimateId] = useState(null);
 
-}
-   useEffect(()=>{
-    getallproduct()
+  const isProductInWishlist = (id) =>
+    wishlist?.some((item) => item._id === id);
 
-   },[])
+  const toggleWishlist = (id) => {
+    isProductInWishlist(id)
+      ? removeFromWishlist(id)
+      : addToWishlist(id);
 
+    setAnimateId(id);
+    setTimeout(() => setAnimateId(null), 400);
+  };
 
-   return <>
-   
-{isLoading? <div className='flex justify-center items-center h-screen'> <BounceLoader color="#08b623" /></div> : <div className="row">
-{data?.map((product)=><div key={product.id} className='w-1/6  relative' >
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <BounceLoader color="#08b623" />
+      </div>
+    );
+  }
 
-<div className="product px-2  ">
-<Link to={`/Prodectdetails/${product.id}/${product.category.name}`}>  <img src={product.imageCover} alt={product.title} />
-<h3 className='text-green-400 text-sm'>{product.category.name}</h3>
-<h1 className='text-gray-400 text-lg'>{product.title.split(" ",2).join(" ")}</h1>
-<div className="flex justify-between items-center">
-  {product.priceAfterDiscount?<><span className='font-light text-red-400 line-through'>{product.price}EGP</span>
-<span className='font-light text-sm'>{product.priceAfterDiscount}EGP</span></>: <span className='font-light'>{product.price}EGP</span>}
-<span>{product.ratingsAverage} <i className='fas fa-star text-yellow-300'> </i> </span>
- </div>
+  return (
+    <div className="container mx-auto px-4 mt-10">
+      {/* GRID RESPONSIVE */}
+      <div className="
+        grid
+        grid-cols-2
+        sm:grid-cols-3
+        md:grid-cols-4
+        lg:grid-cols-5
+        xl:grid-cols-6
+        gap-4
+      ">
+        {data?.map((product) => {
+          const productId = product?._id;
+          const productTitle =
+            product?.title?.split(" ", 2).join(" ");
+          const inWishlist = isProductInWishlist(productId);
 
-</Link>
+          return (
+            <div key={productId} className="relative">
+              <div className="product p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition">
 
-<button onClick={()=>addproducttocart(product.id)}  type="button" className="text-white  btn  bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">+ Add</button>
+                <Link
+                  to={`/prodectdetails/${productId}/${product?.category?.name}`}
+                >
+                  <img
+                    src={product?.imageCover}
+                    alt={productTitle}
+                    className="w-full h-40 object-contain"
+                  />
 
-{product.priceAfterDiscount? <span className="bg-red-500 z-20 text-red-400 left-1.5 text-xs font-medium me-2 px-2.5 py-2 rounded-sm absolute top-0 dark:bg-red-900 dark:text-red-300 border border-red-400">sale</span>:null}
-</div>
-</div>)}
-  </div>}
-</> 
+                  <h3 className="text-green-500 text-sm mt-2">
+                    {product?.category?.name}
+                  </h3>
+
+                  <h2 className="text-gray-700 text-sm font-medium">
+                    {productTitle}
+                  </h2>
+
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm">
+                      {product?.priceAfterDiscount ? (
+                        <>
+                          <span className="line-through text-red-400 mr-1">
+                            {product.price} EGP
+                          </span>
+                          <span>{product.priceAfterDiscount} EGP</span>
+                        </>
+                      ) : (
+                        `${product.price} EGP`
+                      )}
+                    </span>
+
+                    <span className="text-sm">
+                      {product?.ratingsAverage}
+                      <i className="fas fa-star text-yellow-400 ml-1"></i>
+                    </span>
+                  </div>
+                </Link>
+
+                {/* Wishlist */}
+                <button
+                  onClick={() => toggleWishlist(productId)}
+                  className={`absolute top-2 right-2 p-2 rounded-full shadow
+                    ${inWishlist ? "bg-pink-500 text-white" : "bg-gray-200"}
+                    ${animateId === productId ? "animate-heart" : ""}
+                  `}
+                >
+                  <Heart fill={inWishlist ? "currentColor" : "none"} />
+                </button>
+
+                {/* Add to cart */}
+                <button
+                  onClick={() => addproducttocart(productId)}
+                  className="w-full mt-3 bg-green-500 hover:bg-green-600 text-white py-2 rounded-md text-sm"
+                >
+                  + Add
+                </button>
+
+                {/* Sale badge */}
+                {product?.priceAfterDiscount && (
+                  <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                    Sale
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
