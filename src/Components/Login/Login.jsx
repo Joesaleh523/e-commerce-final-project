@@ -6,29 +6,25 @@ import * as yup from 'yup';
 import { AuthContext } from './../Context/Authcontext';
 
 export default function Login() {
-    const [errormessage,SeterrorMessage]=useState(null)
-   const [isloading,setisloading]=useState(null)
- const navigate = useNavigate();
-let {token,settoken}=useContext(AuthContext)
-  console.log(token,settoken);
- 
-  function handleLogin (values) {
-    setisloading(true);
+  const [errormessage, setErrorMessage] = useState(null);
+  const [isloading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { settoken } = useContext(AuthContext);
+
+  function handleLogin(values) {
+    setIsLoading(true);
     axios
       .post('https://ecommerce.routemisr.com/api/v1/auth/signin', values)
       .then((res) => {
-        console.log(res.data.token);
         localStorage.setItem('token', res.data.token);
-      settoken(res.data.token)
+        settoken(res.data.token);
         navigate('/');
       })
       .catch((error) => {
-        SeterrorMessage(error.response?.data?.message || 'Login failed');
+        setErrorMessage(error.response?.data?.message || 'Login failed');
       })
-      .finally(() => {
-        setisloading(false);
-      });
-  };
+      .finally(() => setIsLoading(false));
+  }
 
   const validationSchema = yup.object({
     email: yup.string().email('Invalid email').required('Email is required'),
@@ -45,55 +41,89 @@ let {token,settoken}=useContext(AuthContext)
   });
 
   return (
-<>
-<form className="max-w-7xl" onSubmit={formik.handleSubmit}>
-<h1 className='text-3xl font-bold  my-10'>Login now</h1>
-  { errormessage? <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
-  <span class="font-medium">{errormessage}</span> 
-</div>: null}
-
-
-
-  <div className="relative z-0 w-full mb-5 group">
-      <input type="email" name="email" value={formik.values.email} onChange={formik.handleChange } onBlur={formik.handleBlur} id="floating_email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-greensparent border-0 border-b-2 border-gray-300 appearance-none dark:text-black dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" />
-      <label htmlFor="floating_email" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 ">Email</label>
-  </div>
-       {formik.errors.email &&formik.touched.email? <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
-  <span class="font-medium">{formik.errors.email}</span> 
-</div>:null}
-
-
-
-   <div className="relative z-0 w-full mb-5 group">
-      <input type="Password" name="password" value={formik.values.password} onChange={formik.handleChange } onBlur={formik.handleBlur} id="floating_email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-greensparent border-0 border-b-2 border-gray-300 appearance-none dark:text-black dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" />
-      <label htmlFor="floating_email" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Password</label>
-  </div>
-        {formik.errors.password &&formik.touched.password? <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
-  <span className="font-medium">{formik.errors.password}</span> 
-</div>:null}
-
-<div className='flex justify-between'>
-<Link to={`/Forgetpassword`}
-className='text-2xl'>
-  Forget password ?
-</Link>
-<div>
-  
-<button
-        disabled={isloading}
-        type="submit"
-        className="text-white bg-black hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-black dark:hover:bg-green-700 dark:focus:ring-blue-800"
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <form
+        onSubmit={formik.handleSubmit}
+        className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md"
       >
-        {isloading ? <i className='fas fa-spin fa-spinner'></i> : 'Login Now'}
-      </button>
-</div>
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          Login Now
+        </h1>
 
-</div>
+        {errormessage && (
+          <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded">
+            {errormessage}
+          </div>
+        )}
 
-  </form>
+        {/* Email */}
+        <div className="mb-5">
+          <label className="block mb-1 text-sm text-gray-600">
+            Email 
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-green-500"
+          />
+          {formik.errors.email && formik.touched.email && (
+            <p className="text-red-500 text-xs mt-1">
+              {formik.errors.email}
+            </p>
+          )}
+        </div>
 
+        {/* Password */}
+        <div className="mb-5">
+          <label className="block mb-1 text-sm text-gray-600">
+            Password
+          </label>
+          <input
+            type="password"
+            name="password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-green-500"
+          />
+          {formik.errors.password && formik.touched.password && (
+            <p className="text-red-500 text-xs mt-1">
+              {formik.errors.password}
+            </p>
+          )}
+        </div>
 
+        <div className="flex justify-between items-center mb-6">
+          <Link
+            to="/Forgetpassword"
+            className="text-sm text-green-600 hover:underline"
+          >
+            Forgot Password?
+          </Link>
+        </div>
 
-</>
+        <button
+          type="submit"
+          disabled={isloading}
+          className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-md font-medium"
+        >
+          {isloading ? (
+            <i className="fas fa-spinner fa-spin"></i>
+          ) : (
+            'Login'
+          )}
+        </button>
+
+        <p className="text-center mt-4 text-sm text-gray-600">
+          Don't have an account?{' '}
+          <Link to="/Register" className="text-green-500 hover:underline">
+            Register
+          </Link>
+        </p>
+      </form>
+    </div>
   );
 }

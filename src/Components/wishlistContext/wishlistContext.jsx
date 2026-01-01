@@ -12,24 +12,7 @@ export default function WishlistContextProvider({ children }) {
     token: localStorage.getItem("token"),
   };
 
-  const addToWishlist = async (productId) => {
-    try {
-      setLoading(true);
-      const { data } = await axios.post(
-        "https://ecommerce.routemisr.com/api/v1/wishlist",
-        { productId },
-        { headers }
-      );
-      toast.success("Added to wishlist ❤️");
-      setWishlist(data.data);
-    } catch (error) {
-      console.error("Add to wishlist error:", error.response?.data || error);
-      toast.error("Failed to add to wishlist");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ✅ Get Wishlist
   const getWishlist = async () => {
     try {
       setLoading(true);
@@ -39,27 +22,40 @@ export default function WishlistContextProvider({ children }) {
       );
       setWishlist(data.data);
     } catch (error) {
-      console.error("Get wishlist error:", error.response?.data || error);
       toast.error("Failed to load wishlist");
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ Add
+  const addToWishlist = async (productId) => {
+    try {
+      const { data } = await axios.post(
+        "https://ecommerce.routemisr.com/api/v1/wishlist",
+        { productId },
+        { headers }
+      );
+      setWishlist(data.data);
+      toast.success("Added to wishlist ❤️");
+    } catch {
+      toast.error("Failed to add to wishlist");
+    }
+  };
+
+  // ✅ Remove
   const removeFromWishlist = async (productId) => {
     try {
-      setLoading(true);
       await axios.delete(
         `https://ecommerce.routemisr.com/api/v1/wishlist/${productId}`,
         { headers }
       );
-      toast.success("Removed from wishlist");
-      setWishlist((prev) => prev.filter((item) => item._id !== productId));
-    } catch (error) {
-      console.error("Remove from wishlist error:", error.response?.data || error);
+      setWishlist((prev) =>
+        prev.filter((item) => item._id !== productId)
+      );
+      toast.success("Removed from wishlist 💔");
+    } catch {
       toast.error("Failed to remove from wishlist");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -67,8 +63,8 @@ export default function WishlistContextProvider({ children }) {
     <WishlistContext.Provider
       value={{
         wishlist,
-        addToWishlist,
         getWishlist,
+        addToWishlist,
         removeFromWishlist,
         loading,
       }}

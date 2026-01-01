@@ -17,13 +17,21 @@ export default function RecentProduct() {
   const isProductInWishlist = (id) =>
     wishlist?.some((item) => item._id === id);
 
-  const toggleWishlist = (id) => {
-    isProductInWishlist(id)
-      ? removeFromWishlist(id)
-      : addToWishlist(id);
+  const toggleWishlist = async (id) => {
+    if (!addToWishlist || !removeFromWishlist) return; // safety
 
-    setAnimateId(id);
-    setTimeout(() => setAnimateId(null), 400);
+    try {
+      if (isProductInWishlist(id)) {
+        await removeFromWishlist(id);
+      } else {
+        await addToWishlist(id);
+      }
+
+      setAnimateId(id);
+      setTimeout(() => setAnimateId(null), 400);
+    } catch (error) {
+      console.error("Wishlist toggle error:", error);
+    }
   };
 
   if (isLoading) {
@@ -42,7 +50,10 @@ export default function RecentProduct() {
           const inWishlist = isProductInWishlist(productId);
 
           return (
-            <div key={productId} className="relative border rounded-lg p-2 flex flex-col">
+            <div
+              key={productId}
+              className="relative border rounded-lg p-2 flex flex-col"
+            >
               <Link
                 to={`/prodectdetails/${productId}/${product.category?.name}`}
                 className="flex-1"
