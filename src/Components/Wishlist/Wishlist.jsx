@@ -57,20 +57,20 @@ export default function Wishlist() {
                 </button>
 
                 <Link
-                  to={`/prodectdetails/${productId}/${product?.category?.name}`}
+                  to={`/prodectdetails/${productId}/${product?.category?.name || "uncategorized"}`}
                 >
                   <img
                     src={product.imageCover}
-                    alt={product.title}
+                    alt={product.title || "Product Image"}
                     className="w-full h-40 object-cover rounded"
                   />
                   <h3 className="text-sm text-gray-700 mt-2">
-                    {product.title.split(" ", 3).join(" ")}
+                    {(product.title || "").split(" ", 3).join(" ")}
                   </h3>
                 </Link>
 
                 <p className="text-green-600 font-medium mt-1">
-                  {product.price} EGP
+                  {product.price || 0} EGP
                 </p>
               </div>
             );

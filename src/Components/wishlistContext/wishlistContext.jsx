@@ -20,7 +20,19 @@ export default function WishlistContextProvider({ children }) {
         "https://ecommerce.routemisr.com/api/v1/wishlist",
         { headers }
       );
-      setWishlist(data.data);
+
+      // تأمين البيانات بالقيم الافتراضية
+      const safeData = data.data.map((product) => ({
+        _id: product._id || "",
+        title: product.title || "",
+        imageCover: product.imageCover || "",
+        price: product.price || 0,
+        category: {
+          name: product?.category?.name || "uncategorized",
+        },
+      }));
+
+      setWishlist(safeData);
     } catch (error) {
       toast.error("Failed to load wishlist");
     } finally {
@@ -36,7 +48,19 @@ export default function WishlistContextProvider({ children }) {
         { productId },
         { headers }
       );
-      setWishlist(data.data);
+
+      // تأمين البيانات بعد الإضافة
+      const safeData = data.data.map((product) => ({
+        _id: product._id || "",
+        title: product.title || "",
+        imageCover: product.imageCover || "",
+        price: product.price || 0,
+        category: {
+          name: product?.category?.name || "uncategorized",
+        },
+      }));
+
+      setWishlist(safeData);
       toast.success("Added to wishlist ❤️");
     } catch {
       toast.error("Failed to add to wishlist");
